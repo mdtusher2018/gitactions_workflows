@@ -84,7 +84,6 @@ on:
   push:
     branches: ["main"]
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -111,36 +110,72 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 🔐 Decode keystore
+      # 🔍 Check if signing secrets are available
+      # Must happen BEFORE any build step
+      - name: Check signing setup
+        id: signing_check
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_PROPERTIES_BASE64: ${{ secrets.KEY_PROPERTIES_BASE64 }}
+        run: |
+          if [[ -n "$KEYSTORE_BASE64" && -n "$KEY_PROPERTIES_BASE64" ]]; then
+            echo "SIGNED=true" >> $GITHUB_ENV
+          else
+            echo "SIGNED=false" >> $GITHUB_ENV
+          fi
+
+      # ─── SIGNED PATH ──────────────────────────────────────────────
+
+      # 🔐 Decode keystore (signed only)
       - name: Decode Keystore
+        if: env.SIGNED == 'true'
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
 
-      # 🔐 Decode key.properties
+      # 🔐 Decode key.properties (signed only)
       - name: Decode key.properties
+        if: env.SIGNED == 'true'
         run: echo "${{ secrets.KEY_PROPERTIES_BASE64 }}" | base64 --decode > android/key.properties
 
-      # 🧱 Build APK (Obfuscated)
-      - name: Build APK
-        run: flutter build apk --release --obfuscate --split-debug-info=build/debug-info
+      # 🧱 Build signed release APK
+      - name: Build Signed APK
+        if: env.SIGNED == 'true'
+        run: flutter build apk --release
 
-      # 📦 Build AAB (Obfuscated)
-      - name: Build App Bundle
-        run: flutter build appbundle --release --obfuscate --split-debug-info=build/debug-info
-
-      # 📤 Upload APK
-      - name: Upload APK
+      # 📤 Upload signed APK
+      - name: Upload Signed APK
+        if: env.SIGNED == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: user-apk
+          name: app-release-signed
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      # 📤 Upload AAB
-      - name: Upload User AAB
+      # 📦 Build signed AAB (requires signing — Play Store upload)
+      - name: Build Signed App Bundle
+        if: env.SIGNED == 'true'
+        run: flutter build appbundle --release
+
+      # 📤 Upload signed AAB
+      - name: Upload Signed AAB
+        if: env.SIGNED == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: user-aab
+          name: app-release-signed-aab
           path: build/app/outputs/bundle/release/app-release.aab
 
+      # ─── UNSIGNED FALLBACK PATH ───────────────────────────────────
+
+      # 🧱 Build debug APK when no signing secrets exist
+      - name: Build Debug APK (unsigned fallback)
+        if: env.SIGNED == 'false'
+        run: flutter build apk --debug
+
+      # 📤 Upload debug APK
+      - name: Upload Debug APK
+        if: env.SIGNED == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-unsigned
+          path: build/app/outputs/flutter-apk/app-debug.apk
 
 ```
 
