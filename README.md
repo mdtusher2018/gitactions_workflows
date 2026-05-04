@@ -26,7 +26,7 @@ project-root/
 
 ---
 
-## 🔐 Step 1: Prepare Signing Files
+## 🔐 Step 1: Prepare Signing Files (for release Signed)
 
 ### 1. Create `key.properties`
 
@@ -52,7 +52,7 @@ Run locally:
 
 ---
 
-## 🔑 Step 2: Add GitHub Secrets
+## 🔑 Step 2: Add GitHub Secrets (for release Signed)
 
 Go to:
 
@@ -181,7 +181,7 @@ jobs:
 
 ---
 
-## 🧱 Step 4: Android Signing Configuration
+## 🧱 Step 4: Android Signing Configuration (for release Signed)
 
 Inside:
 
@@ -249,7 +249,7 @@ Download from:
 
 ---
 
-## ⚠️ Important Notes
+## ⚠️ Important Notes (for release Signed)
 
 * Never commit:
 
