@@ -167,7 +167,7 @@ jobs:
       # 🧱 Build debug APK when no signing secrets exist
       - name: Build Debug APK (unsigned fallback)
         if: env.SIGNED == 'false'
-        run: flutter build apk --debug
+        run: flutter build apk
 
       # 📤 Upload debug APK
       - name: Upload Debug APK
@@ -175,7 +175,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-unsigned
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
 ```
 
@@ -218,6 +218,8 @@ android {
         release {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
+            }else{
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
