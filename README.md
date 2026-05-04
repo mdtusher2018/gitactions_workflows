@@ -2,18 +2,26 @@
 
 This guide helps you set up **GitHub Actions** to automatically build **signed APK and AAB files** for your Flutter app.
 
+> ⚡ This workflow is triggered automatically on every push to the `main` branch.
+
 ---
 
 ## 📁 Project Structure
 
-Ensure your project contains:
+Ensure your project contains the following structure:
 
 ```
-android/
- ├── app/
- │   ├── build.gradle.kts
- │   └── keystore.jks
- ├── key.properties
+project-root/
+├── .github/
+│   └── workflows/
+│       └── android-build.yml
+├── android/
+│   ├── app/
+│   │   ├── build.gradle.kts
+│   │   └── keystore.jks (for release Signed)
+│   └── key.properties (for release Signed)
+├── lib/
+├── pubspec.yaml
 ```
 
 ---
@@ -70,7 +78,7 @@ Create file:
 Paste:
 
 ```yaml
-name: Flutter - Android Build (Flavors + Signed)
+name: Flutter - Android Build APK & App Bundle
 
 on:
   push:
@@ -132,6 +140,7 @@ jobs:
         with:
           name: user-aab
           path: build/app/outputs/bundle/release/app-release.aab
+
 
 ```
 
@@ -223,3 +232,10 @@ Now every push to `main` will:
 
 
 Happy shipping 🚀
+
+
+
+
+
+
+
